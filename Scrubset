@@ -1,0 +1,32 @@
+-- These are the selected values.
+SELECT q.Id AS [Post Link], q.Score, q.ViewCount, q.CreationDate, 
+u.Id as [User Link], a.Score AS "Accepted Score", t.Id as [User Link]
+
+-- This defines the values of the answers, question owner and answer owner.
+FROM Posts q
+JOIN Posts a ON q.AcceptedAnswerId = a.Id
+JOIN Users u ON q.OwnerUserId = u.Id
+JOIN Users t ON a.OwnerUserId = t.Id
+WHERE q.PostTypeId = 1
+
+-- This compares the current post to a keyword as to find it in the title.
+AND LOWER(q.Title) LIKE '%______%'
+
+-- The addition "ands" are to remove any keywords which might provide invalid results.
+AND LOWER(q.Title) NOT LIKE '%______%'
+AND LOWER(q.Title) NOT LIKE '%______%'
+
+-- This allows us to define a "minimum score" the question should have.
+AND q.Score >= ##MinScore:int## 
+
+-- This allows us to define a minimum viewer count the question should have.
+AND q.ViewCount >= ##MinView:int##
+
+-- This makes sure that their is an accepted answer.
+AND q.AcceptedAnswerId IS NOT NULL
+
+-- This makes sure the creation date is not older than five years.
+AND q.CreationDate > '2017-01-01'
+
+-- This orders the post by how much score they have.
+ORDER BY q.Score DESC
